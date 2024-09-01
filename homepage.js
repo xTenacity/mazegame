@@ -1,150 +1,111 @@
-var lineWidth = 1;
+//for the canvas
+var canvas;
+var body;
+var ctx;
+
+var boardWidth = 10;
+var boardHeight = 16;
+
 var playing = true;
-var boardSize = 600;
-var turn = 0;
-var board = [["", "", ""], ["", "", ""], ["", "", ""]];
+var pKey = [false, false, false, false];
 
+var playerPos = [10, 10];
 
-
-
-var canvas = document.createElement('canvas');
-canvas.id = "CursorLayer";
-canvas.width = boardSize + (lineWidth * 3);
-canvas.height = boardSize + (lineWidth * 3);
-canvas.style.top = "100px";
-canvas.style.left = ((window.screen.width / 2) - (canvas.width / 2)) + "px";
-canvas.style.position = "absolute";
-
-var resetButton = document.createElement("button");
-resetButton.id = "resetButton";
-resetButton.innerHTML = "reset";
-resetButton.style.position = "absolute";
-resetButton.style.top = (canvas.height + parseInt(canvas.style.top) + 10) + "px";
-resetButton.style.left = ((canvas.width / 2) - 50 + parseInt(canvas.style.left)) + "px";
-resetButton.style.width = "100px";
-resetButton.style.height = "50px";
-
-var turnLabel = document.createElement("h1");
-turnLabel.id = "turnLabel";
-turnLabel.innerHTML = "X's Turn";
-turnLabel.style.position = "absolute";
-turnLabel.style.top = "10px";
-turnLabel.style.left = ((canvas.width / 2) - 50 + parseInt(canvas.style.left)) + "px";
-turnLabel.style.width = "200px";
-turnLabel.style.height = "50px";
-
-var body = document.getElementsByTagName("body")[0];
-body.appendChild(canvas);
-body.appendChild(resetButton);
-body.appendChild(turnLabel);
-var ctx = canvas.getContext("2d");
-createBoard();
-
-
-function createBoard(color) {
-  ctx.fillStyle = color;
-  for (var i = 0; i < 2; i++) {
-    ctx.fillRect(0, (canvas.height / 3) * (i + 1), canvas.height, lineWidth);
-    ctx.fillRect((canvas.width / 3) * (i + 1), 0, lineWidth, canvas.width);
-  }
+function Player(position, size, ) {
+  this.name = name; //name of map
+  this.map = map; //made of map width, board width, map string
+  this.iPos = iPos; //made of initial map x, initial map y, initial board xy
 }
 
-function updateScreen(x, y) {
-  ctx.fillStyle = randColor();
-  if (board[x][y] == "x") {
-    //draw X
-    ctx.beginPath();          // Start a new path
-    ctx.moveTo(25 + (x * 200), 25 + (y * 200));       // Move the cursor to (50, 50)
-    ctx.lineTo(175 + (x * 200), 175 + (y * 200));      // Draw a line to (150, 50)
-    ctx.moveTo(175 + (x * 200), 25 + (y * 200));     // Draw a line to (150, 100)
-    ctx.lineTo(25 + (x * 200), 175 + (y * 200));      // Draw a line to (50, 100)
-    ctx.closePath();           // Close the path (optional)
-    ctx.strokeStyle = randColor(); // Set the line color
-    ctx.lineWidth = 10;        // Set the line width
-    ctx.stroke();
-  } else if (board[x][y] == "o") {
-    ctx.beginPath();
-    ctx.arc(100 + (x * 200), 100 + (y * 200), 75, 0, 2 * Math.PI, false);
-    ctx.closePath();           // Close the path (optional)
-    ctx.strokeStyle = randColor(); // Set the line color
-    ctx.lineWidth = 10;        // Set the line width
-    ctx.stroke();
-  }
-}
-
-function clearCanvas() {
-  ctx.fillStyle = "rgba(255,255,255,1)";
-  ctx.fillRect(0, 0, boardSize + 3, boardSize + 3);
-}
-
-function checkWin() {
-  ctx.beginPath();
-  var winner = "";
-  for (var i = 0; i < 3; i++) {
-    if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][0] != "") { //columns
-      ctx.moveTo(100 + (i * 200), 0);
-      ctx.lineTo(100 + (i * 200), boardSize);
-      winner = board[i][0]
-    } else if (board[0][i] == board[1][i] && board[1][i] == board[2][i] && board[0][i] != "") { //rows
-      ctx.moveTo(0, 100 + (i * 200));
-      ctx.lineTo(boardSize, 100 + (i * 200));
-      winner = board[0][i]
-    }
-  }
-  if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != "") {
-    ctx.moveTo(0, 0);
-    ctx.lineTo(boardSize, boardSize);
-    winner = board[0][0]
-  } else if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != "") {
-    ctx.moveTo(boardSize, 0);
-    ctx.lineTo(0, boardSize);
-    winner = board[0][2];
-  }
-  ctx.closePath();           // Close the path (optional)
-  ctx.strokeStyle = randColor();
-  ctx.lineWidth = 20;        // Set the line width
-  ctx.stroke();
-  if (winner != "") {
-    setTimeout(() => alert(winner + " wins!"), 0);
-    playing = false;
-  } else if (turn == 9) {
-    setTimeout(() => alert("It was a tie!"), 0);
-    playing = false;
-  }
-}
-
-addEventListener("click", function(event) {
-  if (playing == true) {
-    if ((event.clientX < (boardSize + parseInt(canvas.style.left)) && (event.clientX > parseInt(canvas.style.left))) &&
-      (event.clientY < (boardSize + parseInt(canvas.style.top)) && (event.clientY > parseInt(canvas.style.top)))) {
-      var x = Math.floor((event.clientX - parseInt(canvas.style.left)) / 200);
-      var y = Math.floor((event.clientY - parseInt(canvas.style.top)) / 200);
-      if (board[x][y] == "") {
-        if (turn % 2 == 0) {
-          board[x][y] = "x";
-          turnLabel.innerHTML = "O's Turn";
-        } else {
-          board[x][y] = "o";
-          turnLabel.innerHTML = "X's Turn";
-        }
-        turn++;
-        checkWin();
-        updateScreen(x, y);
-
-      }
-    }
-  }
-});
-resetButton.addEventListener("click", function() {
-  playing = true;
-  turn = 0;
-  turnLabel.innerHTML = "X's Turn";
-  board = [["", "", ""], ["", "", ""], ["", "", ""]];
-  clearCanvas();
-  createBoard(randColor());
+/*
+0 - empty
+1 - red block
+2 - blue block
+3 - green block
+4 - yellow block
+5 - controlled block
+*/
+document.addEventListener('DOMContentLoaded', function() { //load everything
+  canvas = document.createElement('canvas');
+  canvas.id = "CursorLayer";
+  canvas.width = boardWidth * 50;
+  canvas.height = boardHeight * 50;
+  canvas.style.top = "10px";
+  canvas.style.left = ((window.screen.width / 2) - (canvas.width / 2)) + "px";
+  canvas.style.position = "absolute";
+  canvas.style.borderWidth = "10px";
+  body = document.getElementsByTagName("body")[0];
+  body.appendChild(canvas);
+  ctx = canvas.getContext("2d");
+  document.addEventListener('keydown', keydown);
+  document.addEventListener('keyup', keyup);
+  //drawUI();
+  setInterval(updateScreen, 10);
 });
 
+function drawUI() { //draw the screen
+  
+}
 
-function randColor() {
-  return "rgba(" + Math.floor(Math.random() * 256) + ", " + Math.floor(Math.random() * 256) + ", " + Math.floor(Math.random() * 256) + ", 1)";
+function updateScreen() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "white";
+  ctx.fillRect(playerPos[0] - 5, playerPos[1] - 5, 10, 10);
+  move();
+  drawUI();
+}
+
+function move() {
+  if (pKey[0] == true && pKey[2] == false) { //if going up and not down
+    playerPos[1] -= 1;
+  }
+  if (pKey[0] == false && pKey[2] == true) { //if going down and not up
+    playerPos[1] += 1
+  }
+  if (pKey[1] == true && pKey[3] == false) { //if going left and not right
+    playerPos[0] -= 1;
+  }
+  if (pKey[1] == false && pKey[3] == true) { //if going right and not left
+    playerPos[0] += 1;
+  }
+}
+
+
+
+function checkInput(key, event) {
+  if (event == "down") {
+    if (key == "w") { //up
+      pKey[0] = true;
+    }
+    if (key == "a") { //left
+      pKey[1] = true;
+    }
+    if (key == "s") { //down
+      pKey[2] = true;
+    }
+    if (key == "d") { //right
+      pKey[3] = true;
+    }
+  } else {
+    if (key == "w") { //up
+      pKey[0] = false;
+    }
+    if (key == "a") { //left
+      pKey[1] = false;
+    }
+    if (key == "s") { //down
+      pKey[2] = false;
+    }
+    if (key == "d") { //right
+      pKey[3] = false;
+    }
+  }
+}
+
+function keydown(event) {
+  checkInput(event.key, "down");
+}
+
+function keyup(event) {
+  checkInput(event.key, "up");
 }
